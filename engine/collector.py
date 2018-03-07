@@ -213,7 +213,7 @@ class AutomaticCollector(Collector):
 
     def run_command(self, command):
         runcmds = shlex.split(command.replace(definitions.TIMESTAMP_PLACEHOLDER, self.start_time))
-
+        
         try:
             process = subprocess.Popen(runcmds,
                                        shell=False,
@@ -260,33 +260,33 @@ class AutomaticCollector(Collector):
             return True
         return False
 
-    class AutoRestart(Thread): #TODO: Review this
-        def __init__(self, outer, event):
-            Thread.__init__(self)
-            self.outer = outer
-            self.stopped = event
-            self.auto_restart_enabled = self.outer.config.get_collector_auto_restart_enabled()
-            self.time_interval = self.outer.config.get_collector_auto_restart_time_interval()
+class AutoRestart(Thread): #TODO: Review this
+    def __init__(self, outer, event):
+        Thread.__init__(self)
+        self.outer = outer
+        self.stopped = event
+        self.auto_restart_enabled = self.outer.config.get_collector_auto_restart_enabled()
+        self.time_interval = self.outer.config.get_collector_auto_restart_time_interval()
 
-        def run(self):
-            while not self.stopped.wait(self.time_interval):
-                procs = list(self.outer.processes)
-                for process in procs:
-                    poll_res = process.poll()
-                    if poll_res is not None:
-                        self.restart_process(process)
+    def run(self):
+        while not self.stopped.wait(self.time_interval):
+            procs = list(self.outer.processes)
+            for process in procs:
+                poll_res = process.poll()
+                if poll_res is not None:
+                    self.restart_process(process)
 
-        def restart_process(self, dead_process):
-            command = self.outer.pid_commands[dead_process.pid]
-            self.outer.processes.remove(dead_process)
-            del self.outer.pid_commands[dead_process.pid]
-            if(self.auto_restart_enabled):
-                print("Auto restart enabled for: " + self.outer.name)
-                print("Auto restart interval: " + str(self.time_interval))
-                print("Attempting to restart...")
-            #print(" --> process %s died, attempting to restart..." % (dead_process.pid))
-            #In the case of tshark, process restarts, but dies if interface is down; can't tell if it continues runningd
-            self.outer.run_command(command)
+    def restart_process(self, dead_process):
+        command = self.outer.pid_commands[dead_process.pid]
+        self.outer.processes.remove(dead_process)
+        del self.outer.pid_commands[dead_process.pid]
+        if(self.auto_restart_enabled):
+            print("Auto restart enabled for: " + self.outer.name)
+            print("Auto restart interval: " + str(self.time_interval))
+            print("Attempting to restart...")
+        #print(" --> process %s died, attempting to restart..." % (dead_process.pid))
+        #In the case of tshark, process restarts, but dies if interface is down; can't tell if it continues runningd
+        self.outer.run_command(command)
 
 
 class CollectorConfig():
