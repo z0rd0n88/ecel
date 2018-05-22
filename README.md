@@ -9,7 +9,7 @@ ECEL has been tested on:
 
 ## Installation
 To install ECEL, run `./install.sh`. A internet connection is required for installation.
-
+* In order for the ecel_parser and dss to work with the ECEL project the variables: ECEL_PARSER_ROOT and ECEL_DSS_ROOT need to be modified in the file ecel/definitions.py needs to be edited with the correct directories. This will allow ECEL to save the parsed results into mongoDB and also allow suggestions to be pulled from MonngoDB.
 ## Execution
 Run `./ecel_gui` to execute ECEL. This will invoke the main GUI and a clickable status icon will appear in the task bar.
 
